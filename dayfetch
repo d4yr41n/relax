@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+
+animation="skull"
+
+delay=0.5
+
+printf -v c0 "\033[0m"
+printf -v c1 "\033[31m"
+printf -v h1 "\033[1;31m"
+
+while getopts ":hp:a:d:c:" option; do
+    case $option in
+        h ) echo "dayfetch: animated system info fetch"
+            echo "usage: dayfetch [options]"
+            echo "-h display this help message"
+            echo "-p path to animations (skull)"
+            echo "-a animation (skull, moon, face, bunny)"
+            echo "-d delay between frames (float)"
+            echo "-c color (31-37)"
+            exit
+            ;;
+        p ) animations=$OPTARG ;;
+        a ) animation=$OPTARG ;;
+        d ) delay=$OPTARG ;;
+        c ) printf -v c1 "\033[${OPTARG}m"
+            printf -v h1 "\033[1;${OPTARG}m"
+            ;;
+    esac
+done
+
+if [ -n "$animations" ] && [ -d $animations/$animaion ]; then
+    path=$animations/$animation
+elif [ -d ~/.local/share/dayfetch/$animation ]; then
+    path=~/.local/share/dayfetch/$animation
+elif [ -d /usr/share/dayfetch/$animation ]; then
+    path=/usr/share/dayfetch/$animation
+else
+    echo "Animation not found"
+    exit
+fi
+
+
+whoami=$(whoami)
+hostname=$(hostname)
+
+if test -f /etc/os-release
+then
+    source /etc/os-release
+    os=$PRETTY_NAME
+elif command -v lsb_release &> /dev/null
+then
+    os=$(lsb_release -sd | tr -d '"')
+fi
+
+kernel=$(uname -r)
+
+init=$(basename $(readlink /sbin/init))
+if [ -z "$init" ]; then
+	init=$(/sbin/init --version | awk 'NR==1 { print $1 }')
+fi
+
+shell=$(basename $SHELL)
+
+uptime=$(uptime -p | cut -b 4-)
+
+fetch=(
+    "$h1$whoami$c0@$h1$hostname$c0"
+    "${h1}os${c0} $os"
+	"${h1}kernel${c0} $kernel"
+	"${h1}init${c0} $init"
+    "${h1}shell${c0} $shell"
+    "${h1}uptime${c0} $uptime"
+)
+
+entries=${#fetch[@]}
+
+cleanup () {
+    clear
+    printf "\e[?25h"
+}
+
+trap cleanup EXIT
+trap 'clear' SIGWINCH
+printf "\e[?25l"
+clear
+
+while true; do
+    for frame in $(ls $path | sort -g); do
+        printf "\033[H"
+
+        entry=0
+        while IFS= read -r line; do
+            line=$(echo "$line" | sed "s/{c1}/$c1/g;s/{c0}/$c0/g")
+            if [ $entry -lt $entries ]; then
+                line+="   ${fetch[entry]}"
+                ((entry++))
+            fi
+            printf "%s\r\n" "$line"
+        done < $path/$frame
+    
+        sleep $delay
+    done
+done
+
