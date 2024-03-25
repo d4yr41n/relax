@@ -12,18 +12,16 @@
 
 
 ### Installation
-```sh
+```
 git clone https://github.com/d4yr41n/dayfetch.git
 cd dayfetch
 cp dayfetch ~/.local/bin
-mkdir ~/.local/share/dayfetch
+mkdir -p ~/.local/share/dayfetch
 cp -r animations/* ~/.local/share/dayfetch
 ```
 
-For global installation replace ~/.local to /usr
-
 ### Launch
-```sh
+```
 dayfetch
 ```
 
