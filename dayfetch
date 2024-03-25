@@ -22,7 +22,7 @@ input() {
 				exit
 				;;
 			a ) animation=${OPTARG} ;;
-			d ) delay=$((1 / ${OPTARG})) ;;
+			f ) delay=$((1 / ${OPTARG})) ;;
 			c ) c1=$(echo -e "\e[3${OPTARG}m")
 				h1=$(echo -e "\e[1;3${OPTARG}m")
 				;;
