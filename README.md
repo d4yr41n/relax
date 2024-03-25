@@ -1,15 +1,4 @@
-### TODO
-- [ ] sixel support
-- [ ] install script
-- [ ] animation generator
-
-### Animations
-- moon
-- face
-- earth
-- bunny
-- skull
-
+[dayfetch](dayfetch.gif)
 
 ### Installation
 ```
@@ -20,8 +9,21 @@ mkdir -p ~/.local/share/dayfetch
 cp -r animations/* ~/.local/share/dayfetch
 ```
 
-### Launch
+### Usage
 ```
 dayfetch
 ```
+
+### Animations
+- moon
+- face
+- earth
+- bunny
+- skull
+
+### TODO
+- [ ] sixel support
+- [ ] install script
+- [ ] animation generator
+
 
