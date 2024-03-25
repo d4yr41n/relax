@@ -1,4 +1,4 @@
-[dayfetch](dayfetch.gif)
+![dayfetch](dayfetch.gif)
 
 ### Installation
 ```
