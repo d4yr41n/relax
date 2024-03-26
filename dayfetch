@@ -2,16 +2,16 @@
 
 animation="skull"
 
-delay=0.5
+delay=0.2
 
 c0=$(echo -e "\e[0m")
 c1=$(echo -e "\e[31m")
 h1=$(echo -e "\e[1;31m")
-
+mode=true
 info=()
 
 input() {
-	while getopts "ha:d:c:" option; do
+	while getopts "hna:f:c:" option; do
 		case ${option} in
 			h ) echo "dayfetch: animated system info fetch"
 				echo "usage: dayfetch [options]"
@@ -19,12 +19,15 @@ input() {
 				echo "-a animation (skull, moon, face, bunny, earth)"
 				echo "-f fps"
 				echo "-c color (1-7)"
+				echo "-n disable info"
 				exit
 				;;
 			a ) animation=${OPTARG} ;;
-			f ) delay=$((1 / ${OPTARG})) ;;
+			f ) delay=$(bc <<< "scale=3; 1/${OPTARG}") ;;
 			c ) c1=$(echo -e "\e[3${OPTARG}m")
 				h1=$(echo -e "\e[1;3${OPTARG}m")
+				;;
+			n ) mode=false
 				;;
 		esac
 	done
@@ -90,24 +93,24 @@ oninit() {
 }
 
 draw() {
-	echo -en "\e[H"
 	i=0
 	while IFS= read -r line; do
 		line=$(echo "${line}" | sed "s/{c1}/${c1}/g;s/{c0}/${c0}/g")
-		if [ ${i} -lt ${info_length} ]; then
+		if ${mode} && [ ${i} -lt ${info_length} ]; then
 			line+=${info[i]}
 			((i++))
 		fi
 		echo "${line}"
 	done < $1
 
-	sleep $delay
 }
 
 loop() {
 	while true; do
 		for frame in $(ls $path | sort -g); do
+			echo -e "\e[H"
 			draw ${path}/${frame}
+			sleep ${delay}
 		done
 	done
 }
@@ -115,7 +118,9 @@ loop() {
 main() {
 	input $@
 	check
-	fetch
+	if ${mode}; then
+		fetch
+	fi
 	oninit
 	loop
 }
