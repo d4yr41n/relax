@@ -4,9 +4,9 @@ animation="skull"
 
 delay=0.2
 
-c0=$(echo -e "\e[0m")
-c1=$(echo -e "\e[31m")
-h1=$(echo -e "\e[1;31m")
+c0=$(echo -e "\033[0m")
+c1=$(echo -e "\033[31m")
+h1=$(echo -e "\033[1;31m")
 mode=true
 info=()
 
@@ -24,8 +24,8 @@ input() {
 				;;
 			a ) animation=${OPTARG} ;;
 			f ) delay=$(bc <<< "scale=3; 1/${OPTARG}") ;;
-			c ) c1=$(echo -e "\e[3${OPTARG}m")
-				h1=$(echo -e "\e[1;3${OPTARG}m")
+			c ) c1=$(echo -e "\033[3${OPTARG}m")
+				h1=$(echo -e "\033[1;3${OPTARG}m")
 				;;
 			n ) mode=false
 				;;
@@ -82,13 +82,13 @@ fetch() {
 
 onexit () {
 	clear
-	echo -e "\e[?25h"
+	echo -e "\033[?25h"
 }
 
 oninit() {
 	trap onexit EXIT
 	trap clear SIGWINCH
-	echo -e "\e[?25l"
+	echo -e "\033[?25l"
 	clear
 }
 
@@ -108,7 +108,7 @@ draw() {
 loop() {
 	while true; do
 		for frame in $(ls $path | sort -g); do
-			echo -e "\e[H"
+			echo -e "\033[H"
 			draw ${path}/${frame}
 			sleep ${delay}
 		done
