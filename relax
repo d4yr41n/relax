@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+
+animation="human"
+
+delay=0.05
+
+c0=$(echo -e "\033[0m")
+c1=$(echo -e "\033[31m")
+h1=$(echo -e "\033[1;31m")
+
+input() {
+	while getopts "hna:d:c:" option; do
+		case ${option} in
+			h ) echo "relax"
+				echo "usage: relax [options]"
+				echo "-h display this help message"
+				echo "-a animation (skull, moon, face, bunny, human)"
+				echo "-d delay"
+				echo "-c color (1-7)"
+				exit
+				;;
+			a ) animation=${OPTARG} ;;
+			f ) delay=${OPTARG} ;;
+			c ) c1=$(echo -e "\033[3${OPTARG}m")
+				h1=$(echo -e "\033[1;3${OPTARG}m")
+				;;
+			n ) mode=false
+				;;
+		esac
+	done
+}
+
+check() {
+	if [ -d /usr/share/dayfetch/$animation ]; then
+		path=/usr/share/dayfetch/$animation
+	elif [ -d ~/.local/share/dayfetch/$animation ]; then
+		path=~/.local/share/dayfetch/$animation
+	elif [ -d animations/$animation ]; then
+		path=animations/$animation
+	else
+		echo "Animation not found"
+		exit
+	fi
+}
+
+
+onexit () {
+	clear
+	echo -e "\033[?25h"
+}
+
+oninit() {
+	trap onexit EXIT
+	trap clear SIGWINCH
+	echo -e "\033[?25l"
+	clear
+}
+
+draw() {
+	i=0
+	while IFS= read -r line; do
+		line=$(echo "${line}" | sed "s/{c1}/${c1}/g;s/{c0}/${c0}/g")
+		echo "${line}"
+	done < $1
+
+}
+
+loop() {
+	while true; do
+		for frame in $(ls $path | sort -g); do
+			echo -e "\033[H"
+			draw ${path}/${frame}
+			sleep ${delay}
+		done
+	done
+}
+
+main() {
+	input $@
+	check
+	oninit
+	loop
+}
+
+
+main $@
+
